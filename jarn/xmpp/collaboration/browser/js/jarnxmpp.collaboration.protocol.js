@@ -25,6 +25,12 @@ jarnxmpp.ce.msgReceived = function (msg) {
             event = $.Event('jarnxmpp.ce.userLeft');
             event.jid = user_jid;
             $(document).trigger(event);
+        } else if (action === 'caret-set') {
+            event = $.Event('jarnxmpp.ce.caretSet');
+            event.jid = user_jid;
+            event.node = node;
+            event.position = parseInt($(this).attr('position'), 10);
+            $(document).trigger(event);
         }
     });
     return true;
@@ -119,6 +125,13 @@ jarnxmpp.ce.sendNodeFocus = function(node, user) {
     var message = $msg({to: jarnxmpp.ce.component})
         .c('x', {xmlns: jarnxmpp.ce.NS})
         .c('item', {node: node, action: 'focus', user: user});
+    jarnxmpp.connection.send(message);
+};
+
+jarnxmpp.ce.sendCaretSet = function(node, user, position) {
+    var message = $msg({to: jarnxmpp.ce.component})
+        .c('x', {xmlns: jarnxmpp.ce.NS})
+        .c('item', {node: node, action: 'caret-set', user: user, position: position});
     jarnxmpp.connection.send(message);
 };
 

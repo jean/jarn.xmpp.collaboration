@@ -122,6 +122,10 @@ class DifferentialSyncronisationHandler(XMPPHandler):
                 self.participant_focus[sender] = node
                 recipients = [jid for jid in (self.node_participants[node] - set([sender]))]
                 self._sendNodeActionToRecipients('focus', node, sender, recipients)
+            elif action == 'caret-set':
+                recipients = [jid for jid in (self.node_participants[node] - set([sender]))]
+                data = {'position': elem['position']}
+                self._sendNodeActionToRecipients('caret-set', node, sender, recipients, data=data)
             elif action == 'save':
                 self.setNodeText(sender, node, self.shadow_copies[node])
 
@@ -182,7 +186,7 @@ class DifferentialSyncronisationHandler(XMPPHandler):
         d.addErrback(failure, self)
         return d
 
-    def _sendNodeActionToRecipients(self, action, node, sender, recipients):
+    def _sendNodeActionToRecipients(self, action, node, sender, recipients, data={}):
         if not recipients:
             return
         message = Element((None, "message", ))
@@ -191,7 +195,8 @@ class DifferentialSyncronisationHandler(XMPPHandler):
         item['action'] = action
         item['node'] = node
         item['user'] = sender
-
+        for (key, value) in data.items():
+            item[key] = value
         for jid in recipients:
             message['to'] = jid
             self.xmlstream.send(message)

@@ -193,6 +193,17 @@ jarnxmpp.ce.onNodeFocus = function(event) {
     }
 };
 
+/* Caret event & handler */
+jarnxmpp.ce.tinyNodeCaretChanged = function(node_id) {
+    var node = jarnxmpp.ce.idToNode[node_id];
+    var editor = window.tinyMCE.getInstanceById(node_id);
+    var bm = editor.selection.getBookmark(0, true);
+    jarnxmpp.ce.sendCaretSet(node, jarnxmpp.connection.jid, bm.start);
+};
+
+jarnxmpp.ce.onCaretSet = function(event) {
+
+};
 /* Show error to user*/
 
 jarnxmpp.ce.onErrorOccured = function (event) {
@@ -226,6 +237,8 @@ jarnxmpp.ce._setup = function () {
         $(document).bind('jarnxmpp.ce.userJoined', jarnxmpp.ce.onUserJoined);
         $(document).bind('jarnxmpp.ce.userLeft', jarnxmpp.ce.onUserLeft);
         $(document).bind('jarnxmpp.ce.error', jarnxmpp.ce.onErrorOccured);
+        $(document).bind('jarnxmpp.ce.caretSet', jarnxmpp.ce.onCaretSet);
+
     });
 };
 
@@ -241,13 +254,17 @@ jarnxmpp.ce._setupNode = function (node) {
     if (editor!==undefined) {
         jarnxmpp.ce.tiny_ids[node_id] = '';
         editor.onKeyUp.add(function (ed, l) {
-            jarnxmpp.ce.nodeBlur(editor.id);
+            jarnxmpp.ce.nodeBlur(node_id);
+            jarnxmpp.ce.tinyNodeCaretChanged(node_id);
         });
         editor.onChange.add(function (ed, l) {
-            jarnxmpp.ce.nodeBlur(editor.id);
+            jarnxmpp.ce.nodeBlur(node_id);
         });
         editor.onActivate.add(function (ed) {
-            jarnxmpp.ce.ownNodeFocused(jarnxmpp.ce.idToNode[editor.id]);
+            jarnxmpp.ce.ownNodeFocused(jarnxmpp.ce.idToNode[node_id]);
+        });
+        editor.onMouseUp.add(function (ed) {
+            jarnxmpp.ce.tinyNodeCaretChanged(node_id);
         });
     }  else {
         $(jqid).bind('blur keyup paste', function () {
