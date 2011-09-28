@@ -21,7 +21,9 @@ jarnxmpp.ce._getContent = function (node) {
     var node_id = jarnxmpp.ce.nodeToId[node];
     if (node_id in jarnxmpp.ce.tiny_ids) {
         var editor = window.tinyMCE.getInstanceById(node_id);
-        return editor.getContent();
+        var content = $('<div>').html(editor.getContent());
+        content.find('.caret').remove();
+        return content.html();
     } else {
         return $(jarnxmpp.ce._jqID(node_id)).val();
     }
@@ -83,11 +85,10 @@ jarnxmpp.ce.onApplyPatch = function (event) {
             // First we set a bookmark element. Then apply the patches, then remove the bookmark.
             jarnxmpp.ce.paused_nodes[node_id] = '';
             var caret_element = editor.dom.createHTML('a', {'id': caret_id, 'class': 'mceNoEditor'}, ' ');
-            selection = editor.selection;
             editor.selection.setContent(caret_element);
             // Maybe this will do for IE instead of the above? Need to test
             //editor.execCommand('mceInsertContent', false, caret_element);
-            bookmark_content = editor.getContent();
+            bookmark_content = jarnxmpp.ce._getContent(node);
             content = jarnxmpp.ce.dmp.patch_apply(patches, bookmark_content)[0];
             editor.setContent(content);
 
@@ -202,8 +203,24 @@ jarnxmpp.ce.tinyNodeCaretChanged = function(node_id) {
 };
 
 jarnxmpp.ce.onCaretSet = function(event) {
-
+    var node = event.node;
+    var node_id = jarnxmpp.ce.nodeToId[node];
+    var editor = window.tinyMCE.getInstanceById(node_id);
+    var current_bm = editor.selection.getBookmark(0, true);
+    var caret_bm = current_bm;
+    caret_bm.start = event.position;
+    caret_bm.end = event.position;
+    editor.selection.moveToBookmark(caret_bm);
+    var caret_id = 'caret-' + jarnxmpp.ce._idFromJID(event.jid);
+    var doc = editor.getDoc();
+    var caret = doc.getElementById(caret_id);
+    if (caret !== null)
+        editor.dom.remove(caret);
+    caret = editor.dom.createHTML('span', {'id': caret_id, 'class': 'caret mceNoEditor'});
+    editor.selection.setContent(caret);
+    editor.selection.moveToBookmark(current_bm);
 };
+
 /* Show error to user*/
 
 jarnxmpp.ce.onErrorOccured = function (event) {

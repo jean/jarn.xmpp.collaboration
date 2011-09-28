@@ -9,3 +9,24 @@
 	height: 25px;
 	padding: 5px;
 }
+
+.caret {
+    background-color : red;
+    width : 2px;
+    left: -1px;
+    height: 1em;
+    display:inline-block;
+    margin-right: -1px;
+    position: relative;
+}
+
+.caret-legend {
+    background-color: red;
+    color: #fff;
+    height: 11px;
+    font-size: 11px;
+    position: absolute;
+    margin-top: -1em;
+    border: 1px solid red;
+    padding: 2px 0.5em 4px;
+}
