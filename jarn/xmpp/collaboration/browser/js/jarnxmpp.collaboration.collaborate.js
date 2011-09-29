@@ -21,26 +21,28 @@ jarnxmpp.ce._getContent = function (node) {
     var node_id = jarnxmpp.ce.nodeToId[node];
     if (node_id in jarnxmpp.ce.tiny_ids) {
         var editor = window.tinyMCE.getInstanceById(node_id);
-        var content = $('<div>').html(editor.getContent());
-        content.find('.caret').remove();
-        return content.html();
-    } else {
+        var content = editor.getContent();
+        var j_content = $('<div>').html(content);
+        j_content.find('.caret').remove();
+        return j_content.html();
+    } else
         return $(jarnxmpp.ce._jqID(node_id)).val();
-    }
 };
 
 jarnxmpp.ce._setContent = function (node, content) {
     var node_id = jarnxmpp.ce.nodeToId[node];
     if (node_id in jarnxmpp.ce.tiny_ids) {
         var editor = window.tinyMCE.getInstanceById(node_id);
-        editor.setContent(content);
+        var j_content = $('<div>').html(content);
+        j_content.find('.caret').remove();
+        editor.setContent(j_content.html());
     } else
         $(jarnxmpp.ce._jqID(node_id)).val(content);
 };
 
 
 /* Catch node changes but possibly delay them so as to not send more than 1
-per sec. Should be possible to do without, but need to investigate as it seems
+per 1/2sec. Should be possible to do without, but need to investigate as it seems
 that when the server is flooded with iqs it might disconnect the client. */
 
 jarnxmpp.ce.nodeBlur = function (node_id) {
